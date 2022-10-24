@@ -16,6 +16,7 @@ $ pip install -r requirements.txt
 
 ### Data Preparation：
 Please download the dataset ([LFW](http://vis-www.cs.umass.edu/lfw/)) to construct the face database.
+
 If you want to use your own database, you should prepare your own dataset, and the dataset structure is as follows:
 
 Directory structure:
@@ -40,6 +41,7 @@ The models should be placed  in "newpatch_rl/rlpatch/stmodels".
 
 ## Quick Start
 You should prepare the folder of sacrificed faces according to the above directory structure.
+
 Running this command for attacks:
 ```bash
 $ cd rlpatch
