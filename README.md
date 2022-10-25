@@ -30,7 +30,7 @@ Directory structure:
 Then you can execute the command as follows:
 
 ```bash
-$ cd code_rl/rlpatch
+$ cd newpatch-rl/rlpatch
 $ python create_new_ens.py --database_path Your_Database_Path --new_add 0
 ```
 
