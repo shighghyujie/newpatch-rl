@@ -1,5 +1,14 @@
 # Simultaneously Optimizing Perturbations and Positions for Black-box Adversarial Patch Attacks
 
+This repository contains the code for [Simultaneously Optimizing Perturbations and Positions for Black-box Adversarial Patch Attacks](https://arxiv.org/abs/2212.12995) (TPAMI 2022)
+
+This work empirically illustrates that the position and perturbation
+of the adversarial patch are equally important and interact
+with each other closely. Therefore, taking advantage of
+the mutual correlation, an efficient method is proposed to
+simultaneously optimize them to generate an adversarial
+patch in the black-box setting.
+
 ## Preparation
 
 ### Environment Settings:
