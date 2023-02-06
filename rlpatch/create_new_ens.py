@@ -1,5 +1,4 @@
 from numpy.core.fromnumeric import put
-from rl_solve.tct import add_face
 import argparse
 from attack.tiattack import load_model,crop_imgs
 from torchvision import transforms
@@ -58,5 +57,4 @@ if __name__ =="__main__":
     parser.add_argument('--new_add', type=int, default=1, help='new or add ens')
     opt = parser.parse_args()
     pre = True if opt.new_add == 1 else False
-    add_face(opt.database_path,pre)
     add_face_local(opt.database_path,pre)
