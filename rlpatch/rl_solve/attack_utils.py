@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 import numpy as np
 import dlib
-from cv2 import cv2
+import cv2
 from PIL import Image
 from torchvision import datasets
 import copy
@@ -15,8 +15,7 @@ import torch.nn as nn
 def face_landmarks(initial_pic):
     dotsets = np.zeros((1,81,2))
     detector = dlib.get_frontal_face_detector()
-    #predictor = dlib.shape_predictor('./shape_predictor_68_face_landmarks.dat')
-    predictor = dlib.shape_predictor('/home/lenovo/yujie/code_rl/newpatch_rl/shape_predictor_81_face_landmarks.dat')
+    predictor = dlib.shape_predictor('../shape_predictor_81_face_landmarks.dat')
     
     pic_array = np.array(initial_pic)
     r,g,b = cv2.split(pic_array)

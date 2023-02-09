@@ -21,11 +21,11 @@ from attack.utils import load_ground_truth, Normalize, gkern, DI, get_gaussian_k
 from models import *
 from attack import stick
 from mtcnn_pytorch_master.test import crop_face
+from tqdm import tqdm
 
 import sys
 sys.path.append("../")
-from Loss_Modifier import NPSCalculator,TotalVariation
-from rl_solve.tct import check_tct, reward_tct
+# from Loss_Modifier import NPSCalculator,TotalVariation
 import random
 
 trans = transforms.Compose([
@@ -73,28 +73,28 @@ def load_model(model_name, device):
         resnet = InceptionResnetV1(pretrained='vggface2').eval().to(device)
         return resnet
     elif (model_name == 'insightface'):
-        insightface_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/insightface/insightface.pth'
+        insightface_path = 'stmodels/insightface/insightface.pth'
         model = Backbone(50,0.6,'ir_se')
         model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
         model = model.to(device)
         return model
     elif (model_name == 'sphere20a'):
-        sphere20a_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/sphere20a/sphere20a.pth'
+        sphere20a_path = 'stmodels/sphere20a/sphere20a.pth'
         model = sphere20a(feature=True)
         model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
         model = model.to(device)
         return model
     elif (model_name == 're_sphere20a'):
-        sphere20a_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/re_sphere20a/re_sphere20a.pth'
+        sphere20a_path = 'stmodels/re_sphere20a/re_sphere20a.pth'
         model = sphere20a(feature=True)
         #model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
         model = model.to(device)
         return model
     elif (model_name == 'mobilefacenet'):
-        mobilefacenet_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/mobilefacenet/mobilefacenet_scripted.pt'
+        mobilefacenet_path = 'stmodels/mobilefacenet/mobilefacenet_scripted.pt'
         #model = MobileFaceNet()
         #model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model = torch.jit.load(eval("{}_path".format(model_name)),map_location=device)
@@ -102,14 +102,14 @@ def load_model(model_name, device):
         model = model.to(device)
         return model
     elif (model_name == 'arcface34'):
-        arcface34_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/arcface34/arcface_34.pth'
+        arcface34_path = 'stmodels/arcface34/arcface_34.pth'
         model = iresnet34(False, dropout=0, fp16=True)
         model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
         model = model.to(device)
         return model
     elif (model_name == 'cosface34'):
-        cosface34_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/cosface34/cosface_34.pth'
+        cosface34_path = 'stmodels/cosface34/cosface_34.pth'
         model = iresnet34(False, dropout=0, fp16=True)
         model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
@@ -118,8 +118,8 @@ def load_model(model_name, device):
     elif (model_name == 'tencent'):
         return None
     else:
-        arcface50_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/arcface50/ms1mv3_arcface_r50_fp16.pth'
-        cosface50_path = '/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/cosface50/glint360k_cosface_r50_fp16_0.1.pth'
+        arcface50_path = 'stmodels/arcface50/ms1mv3_arcface_r50_fp16.pth'
+        cosface50_path = 'stmodels/cosface50/glint360k_cosface_r50_fp16_0.1.pth'
         model = iresnet50(False, dropout=0, fp16=True)
         model.load_state_dict(torch.load(eval("{}_path".format(model_name)),map_location=device))
         model.eval()
@@ -127,7 +127,7 @@ def load_model(model_name, device):
         return model
 
 def load_anchors(model_name, device, target):
-    anchor_embeddings =  joblib.load('/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/{}/embeddings_{}_5752.pkl'.format(model_name,model_name))
+    anchor_embeddings =  joblib.load('stmodels/{}/embeddings_{}.pkl'.format(model_name,model_name))
     anchor = anchor_embeddings[target:target+1]
     anchor = anchor.to(device)
     return anchor
@@ -140,11 +140,18 @@ def make_stmask(face,sticker,x,y):
 def crop_imgs(imgs,w,h):
     crops_result = []
     crops_tensor = []
-    for i in range(len(imgs)):
-        crop = crop_face(imgs[i],w,h)
-        crop_ts = trans(crop)
-        crops_result.append(crop)
-        crops_tensor.append(crop_ts)
+    if len(imgs)>1:
+        for i in tqdm(range(len(imgs))):
+            crop = crop_face(imgs[i],w,h)
+            crop_ts = trans(crop)
+            crops_result.append(crop)
+            crops_tensor.append(crop_ts)
+    else:
+        for i in range(len(imgs)):
+            crop = crop_face(imgs[i],w,h)
+            crop_ts = trans(crop)
+            crops_result.append(crop)
+            crops_tensor.append(crop_ts)
     return crops_result, crops_tensor
 
 def cosin_metric(prd,src,device):
@@ -278,7 +285,6 @@ def miattack_face(params_slove, model_names, fr_models,
     mw = sticker.size[0]
     mh = sticker.size[1]
     x, y = params_slove[0]
-    # x,y = 30,21
     weights = params_slove[1]
     epsilon = params_slove[2]
     # nsig = params_slove[3]
@@ -296,21 +302,13 @@ def miattack_face(params_slove, model_names, fr_models,
     delta = torch.zeros_like(X_ori,requires_grad=True).to(device)
 
     with torch.no_grad():
-        # delta[:,:,y:y+mh,x:x+mw] = X_ori[:,:,y:y+mh,x:x+mw]
-        # delta[:,:,y:y+25,x:x+30] = X_ori[:,:,y:y+25,x:x+30]
         X_ori[0,:,y:y+mh,x:x+mw] = torch.zeros([3,mh,mw])
 
-    #label = torch.tensor(label).to(device)
-    
-    
-    #fr_models, anchors = [], []
     anchors = []
     for name in model_names:
-        if name == "tencent":
-            continue
-        #model = load_model(name, device)
+        # if name == "tencent":
+        #     continue
         anchor = load_anchors(name, device, target)
-        #fr_models.append(model)
         anchors.append(anchor)
         
     mask = make_stmask(crops_result[0],sticker,x,y)
@@ -322,47 +320,23 @@ def miattack_face(params_slove, model_names, fr_models,
         X_op = DI(X_adv)
         # print('---iter {}---'.format(itr),end=' ')
         for (i, name) in enumerate(model_names):
-            if name == "tencent":
-                continue
+            # if name == "tencent":
+            #     continue
             X_op = nn.functional.interpolate(X_op, (inputsize[name][0], inputsize[name][1]), mode='bilinear', align_corners=False)
-            
-            #X_op = nn.functional.interpolate(X_adv, (inputsize[name][0], inputsize[name][1]), mode='bilinear', align_corners=False)
             feature = fr_models[i](X_op)
             l_sim = cosin_metric(feature,anchors[i],device)
             # print(name,':','{:.4f}'.format(l_sim.item()),end=' ')
             accm += l_sim * weights[i]
-        # if "tencent" in model_names:
-        #     index = model_names.index("tencent")
-        #     face = tensor2PIL(X_adv[0])
-        #     # face.save("D:/111.png")
-        #     sim_labels, sim_probs = check_tct([face])
-        #     l_sim = torch.zeros([1,1],requires_grad=True).to(device)
-        #     with torch.no_grad():
-        #         l_sim[0][0] = sim_probs[0][sim_labels[0][-1]]*0.003
-        #     accm += l_sim * weights[index]
             
-        #print('---iter {} interval {}--- loss = {}'.format(itr,t,loss))
+        # print('---iter {} interval {}--- loss = {}'.format(itr,t,loss))
         #slope = reward_slope(X_adv,params_slove,sticker,device)
-
-
-
-        # 
         # total_variation = TotalVariation().cuda()
         # tv = total_variation(delta[0])
-        # 
         loss = flag * accm# + 0.3*slope# + 2.5*tv
-        # loss = flag * accm
-        # print('L_sim = {:.4f},L_slope = {:.4f}'.format(flag * accm.item(),0.3*slope.item()),end='\n')
         loss.backward()
         
         # MI operation
         grad_c = X_adv.grad.clone()  
-           
-        # grad_c_patch = torch.zeros([1,3,25,30])
-        # grad_c_patch = grad_c.data[:,:,y:y+25,x:x+30]   
-        # grad_c_patch = F.conv2d(grad_c_patch, TI_kernel(nsig), bias=None, stride=1, padding=(1,1), groups=3)
-        # with torch.no_grad():
-        #     grad_c.data[0,:,y:y+25,x:x+30] = grad_c_patch
         grad_a = grad_c / torch.mean(torch.abs(grad_c), (1, 2, 3), keepdim=True)+1.0*grad_momentum   # 1
         grad_momentum = grad_a
             
@@ -375,25 +349,11 @@ def miattack_face(params_slove, model_names, fr_models,
         #将delta噪声进行平滑
 
         # 1.avg pooling
-        # 1
         # delta2 = torch.zeros(3,25,30)
         # delta2 = delta.data[0,:,y:y+25,x:x+30]
         # pool = nn.AvgPool2d(3,stride=1,padding=1)
         # delta2 = pool(delta2)
         # delta.data[0,:,y:y+25,x:x+30] = delta2
-        # 2
-        # delta2 = torch.zeros(3,25,30)
-        # delta2 = delta.data[0,:,y:y+25,x:x+30]
-        # pool = nn.AvgPool2d(3,stride=1,padding=0)
-        # delta2 = pool(delta2)
-        # patch1 = torch.tensor(delta2)
-        # patch2 = patch1.cpu().numpy()
-        # patch2 = np.transpose(patch2,(2,1,0))
-        # patch3 = cv2.resize(patch2,(25,30))
-        # patch3 = np.transpose(patch3,(2,1,0))
-        # patch4 = torch.from_numpy(patch3)
-        # delta.data[0,:,y:y+25,x:x+30] = patch4
-
         # 2.maxPooling
         # delta2 = torch.zeros(3,25,30)
         # delta2 = delta.data[0,:,y:y+25,x:x+30]
@@ -406,7 +366,6 @@ def miattack_face(params_slove, model_names, fr_models,
         patch1 = torch.tensor(delta2)
         patch2 = patch1.cpu().numpy()
         patch2 = np.transpose(patch2,(2,1,0))
-        # patch3 = cv2.resize(patch2,(18,18))
         patch3 = cv2.resize(patch2,(int(mh/2),int(mw/2)))
         patch3 = cv2.resize(patch3,(mh,mw))
         patch3 = np.transpose(patch3,(2,1,0))

@@ -5,33 +5,13 @@ class Config(object):
     "-----MI parameters------"
     # x,y = 50,36
     x,y = 30,21
-    # epsilon = 0.13
-    # weights = [1]#[0.4,0.4,0.2]
-    # model_names = ["tencent"]
-    #model_names = ["cosface50"]
-    #model_names = ['arcface34']
-    # model_names = ['facenet','arcface34','cosface50']
-    # model_names = ['facenet','arcface50','cosface34']
     model_names = ['cosface50','arcface34','arcface50']
-    # model_names = ['arcface34','cosface34','cosface50','arcface50','mobilefacenet'] # 'arcface34','cosface','facenet','insightface','sphere20a','mobilefacenet','re_sphere20a'
-    # model_names = ['arcface34','cosface34','cosface50','arcface50','facenet','mobilefacenet']#,'insightface'] # 'arcface34','cosface','facenet','insightface','sphere20a','mobilefacenet','re_sphere20a'
-    #threat_name = 'tencent'
+    model_names = ['arcface34','arcface50']
+    # model_names = ['facenet']
     threat_name = 'facenet'
-    # threat_name = 'arcface34'
-    # threat_name = 'cosface50'
-    # threat_name = 'arcface50'
-    # threat_name = 'cosface34'
-    # num_classes = 5749
-    # num_classes = 5753
     num_classes = 5752
-    # img = Image.open('/home/lenovo/shighgh/newpatch_rl/code_rl/rlpatch/2443.jpg')
-    #sticker = Image.new('RGBA',(60,30),(255,255,255,255))
-    # sticker = Image.new('RGBA',(64,28),(255,255,255,255))
     sticker = Image.new('RGBA',(30,40),(255,255,255,255))
-    # sticker = Image.new('RGBA',(30,25),(0,0,0,255))
-    # label = 5749
-    # label = 5751
-    label = 5748
+    # label = 5748
     target = 3820#4863
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     #device = torch.device('cpu')
@@ -40,13 +20,11 @@ class Config(object):
     # width, height = 112, 112
     width, height = 160, 160
     emp_iterations = 100
-    # emp_iterations = 200
     sapce_thd = 40
     di = False
-    adv_img_folder = '/home/yujie/newpatch_rl/code_rl/rlpatch/tencent_check'
-    zoo_folder = '/home/yujie/newpatch_rl/code_rl/rlpatch/two_stage'
+    adv_img_folder = 'res'
+    dataset_folder = '../lfw'
     targeted = False #
-    zoopath = "/home/yujie/newpatch_rl/code_rl/rlpatch/pics_check"
     "------RL parameters-------"
     
     "-----extra parameters-----"

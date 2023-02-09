@@ -1,7 +1,7 @@
 from os import system
 import numpy as np
 import dlib
-from cv2 import cv2
+import cv2
 from PIL import Image
 from torchvision import datasets
 import copy
@@ -16,7 +16,6 @@ from torch.utils.data import DataLoader
 from config import Config
 import matplotlib.pyplot as plt 
 
-from rl_solve.tct import check_tct, reward_tct
 
 inputsize = {'arcface34':[112,112],'arcface50':[112,112],'cosface34':[112,112],'cosface50':[112,112],
              'facenet':[160,160],'insightface':[112,112],'sphere20a':[112,96],'re_sphere20a':[112,96],
@@ -27,7 +26,7 @@ trans = transforms.Compose([
                 #transforms.Normalize(mean=[0.5, 0.5, 0.5],std=[0.5, 0.5, 0.5])
             ])
 def cosin_all(feature,model_name,device):
-    embedding_sets = joblib.load('/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/{}/embeddings_{}_5752.pkl'.format(model_name,model_name))
+    embedding_sets = joblib.load('stmodels/{}/embeddings_{}.pkl'.format(model_name,model_name))
     sets = torch.t(embedding_sets).to(device)
     #print(embedding.shape,sets.shape)
     numerator = torch.mm(feature,sets)
@@ -41,7 +40,7 @@ def cosin_all(feature,model_name,device):
     return metrics.cpu().detach()
                
 def load_anchors(model_name, device, target):
-    anchor_embeddings =  joblib.load('/home/lenovo/yujie/code_rl/newpatch_rl/rlpatch/stmodels/{}/embeddings_{}_5752.pkl'.format(model_name,model_name))
+    anchor_embeddings =  joblib.load('stmodels/{}/embeddings_{}.pkl'.format(model_name,model_name))
     anchor = anchor_embeddings[target:target+1]
     anchor = anchor.to(device)
     return anchor
